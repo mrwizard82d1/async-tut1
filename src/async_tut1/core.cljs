@@ -20,11 +20,6 @@
                      (put! out e)))
     out))
 
-;; Test the `listen` function.
-(let [clicks (listen (dom/getElement "search") "click")]
-  (go (while true
-        (println (<! clicks)))))
-
 (defn jsonp [uri]
   (let [out (chan)
         req (Jsonp. (Uri. uri))]
@@ -34,4 +29,13 @@
 (defn query-url [q]
   (str wiki-search-url q))
 
-(go (println (<! (jsonp (query-url "cats")))))
+(defn user-query []
+  (.-value (dom/getElement "query")))
+
+(defn init []
+  (let [clicks (listen (dom/getElement "search") "click")]
+    (go (while true
+          (<! clicks)
+          (println (<! (jsonp (query-url (user-query)))))))))
+
+(init)
